@@ -27,6 +27,9 @@ def analyze_stock(symbol):
     start_date_90_days_ago = (datetime.today() - timedelta(days=90)).strftime('%Y-%m-%d')
     start_date_8_days_ago = (datetime.today() - timedelta(days=8)).strftime('%Y-%m-%d')
 
+    # Fetch current price
+    current_price = yf.Ticker(symbol).history(period='1d')['Close'].iloc[-1]
+
     data_90_days = get_data(symbol, start_date_90_days_ago, end_date).values
     data_8_days = get_data(symbol, start_date_8_days_ago, end_date).values
 
@@ -39,9 +42,9 @@ def analyze_stock(symbol):
             (macd_8_days[-1] > macd_signal_8_days[-1]) and \
             (data_8_days[-1, 4] > data_90_days[-1, 4]) and \
             (data_8_days[-1, 4] > data_8_days[-2, 4]):
-        return True, round(data_8_days[-1, 4], 2), round(data_8_days[-1, 5], 2)
+        return True, round(data_8_days[-1, 4], 2), round(data_8_days[-1, 5], 2), round(current_price, 2)
     else:
-        return False, round(data_8_days[-1, 4], 2), round(data_8_days[-1, 5], 2)
+        return False, round(data_8_days[-1, 4], 2), round(data_8_days[-1, 5], 2), round(current_price, 2)
 
 
 def get_next_run_time():
@@ -76,9 +79,10 @@ def main():
                 etfs = ['SPY', 'QQQ', 'SPXL', 'VTI', 'VGT']
 
                 for etf in etfs:
-                    recommended, close_price, volume = analyze_stock(etf)
+                    recommended, close_price, volume, current_price = analyze_stock(etf)
                     print(f"\nAnalysis for {etf}:")
                     print(f"Close Price: {close_price:.2f}")
+                    print(f"Current Price: {current_price:.2f}")
                     print(f"Volume: {volume:.2f}")
 
                     if recommended:
