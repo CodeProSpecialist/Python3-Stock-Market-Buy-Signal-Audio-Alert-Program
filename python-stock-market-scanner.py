@@ -39,9 +39,9 @@ def analyze_stock(symbol):
             (macd_8_days[-1] > macd_signal_8_days[-1]) and \
             (data_8_days[-1, 4] > data_90_days[-1, 4]) and \
             (data_8_days[-1, 4] > data_8_days[-2, 4]):
-        return True, data_8_days[-1, 4], data_8_days[-1, 5]
+        return True, round(data_8_days[-1, 4], 2), round(data_8_days[-1, 5], 2)
     else:
-        return False, data_8_days[-1, 4], data_8_days[-1, 5]
+        return False, round(data_8_days[-1, 4], 2), round(data_8_days[-1, 5], 2)
 
 
 def get_next_run_time():
@@ -52,6 +52,10 @@ def get_next_run_time():
     if now > next_run_time:
         next_run_time += timedelta(days=1)
 
+    # Check if the next run time falls on a weekend, if so, advance to Monday
+    while next_run_time.weekday() >= 5:
+        next_run_time += timedelta(days=1)
+
     return eastern.localize(next_run_time)
 
 
@@ -59,29 +63,31 @@ def main():
     eastern = pytz.timezone('US/Eastern')
     next_run_time = get_next_run_time()
 
-    print("Date and Time: ", datetime.now(eastern), "Eastern Time ")
-    print("Next Run Time:", next_run_time.astimezone(eastern), "Eastern Time ")
+    print("Date and Time: ", datetime.now(eastern).strftime("%Y-%m-%d %I:%M:%S %p"), "Eastern Time ")
+    print("Next Run Time:", next_run_time.astimezone(eastern).strftime("%Y-%m-%d %I:%M:%S %p"), "Eastern Time ")
 
     while True:
         now = datetime.now(eastern)
 
         if now >= next_run_time and now.hour < 16:
-            print("Recommended Stocks to Buy Today:")
-            etfs = ['SPY', 'QQQ', 'SPXL', 'VTI', 'VGT']
+            # Check if it's a weekday (Monday through Friday)
+            if now.weekday() < 5:
+                print("Recommended Stocks to Buy Today:")
+                etfs = ['SPY', 'QQQ', 'SPXL', 'VTI', 'VGT']
 
-            for etf in etfs:
-                recommended, close_price, volume = analyze_stock(etf)
-                print(f"\nAnalysis for {etf}:")
-                print(f"Close Price: {close_price}")
-                print(f"Volume: {volume}")
+                for etf in etfs:
+                    recommended, close_price, volume = analyze_stock(etf)
+                    print(f"\nAnalysis for {etf}:")
+                    print(f"Close Price: {close_price:.2f}")
+                    print(f"Volume: {volume:.2f}")
 
-                if recommended:
-                    print(f"{etf} is recommended to buy today.")
-                else:
-                    print(f"{etf} is not recommended to buy today.")
+                    if recommended:
+                        print(f"{etf} is recommended to buy today.")
+                    else:
+                        print(f"{etf} is not recommended to buy today.")
 
-            next_run_time += timedelta(seconds=30)
-            print("\nNext Run Time:", next_run_time.astimezone(eastern), "Eastern Time ")
+                next_run_time += timedelta(seconds=30)
+                print("\nNext Run Time:", next_run_time.astimezone(eastern).strftime("%Y-%m-%d %I:%M:%S %p"), "Eastern Time ")
 
         time.sleep(30)
 
