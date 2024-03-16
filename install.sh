@@ -1,4 +1,4 @@
-# A Shell script
+#/bin/sh
 
 # Update apt-get package lists
 sudo apt-get update
