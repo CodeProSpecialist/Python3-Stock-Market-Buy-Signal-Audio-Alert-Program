@@ -32,6 +32,7 @@ def analyze_stock(symbol):
 
     current_close_price = data_8_days[-1, 3]
     current_open_price = data_8_days[-1, 0]
+    current_price = data_8_days[-1, 3]
     current_volume = data_8_days[-1, 5]
     average_volume = np.mean(data_90_days[:, 5])
 
@@ -39,14 +40,13 @@ def analyze_stock(symbol):
     rsi_8_days, macd_8_days, macd_signal_8_days = calculate_indicators(data_8_days)
 
     # Conditions for recommending a stock
-    if (current_volume <= 0.85 * average_volume) and \
-            (rsi_8_days[-1] > 50) and \
-            (macd_8_days[-1] > macd_signal_8_days[-1]) and \
-            (current_close_price > data_90_days[-1, 4]) and \
-            (current_close_price > data_8_days[-2, 4]):
-        return True, round(current_close_price, 2), round(current_open_price, 2), current_volume, average_volume, round(rsi_8_days[-1], 2), round(macd_8_days[-1], 2)
+    if (current_price > current_open_price) and \
+            (current_price > current_close_price) and \
+            ((current_volume > average_volume) or (current_volume >= 0.9 * average_volume)) and \
+            (rsi_8_days[-1] > 55):
+        return True, round(current_close_price, 2), round(current_open_price, 2), round(current_price, 2), current_volume, average_volume, round(rsi_8_days[-1], 2), round(macd_8_days[-1], 2)
     else:
-        return False, round(current_close_price, 2), round(current_open_price, 2), current_volume, average_volume, round(rsi_8_days[-1], 2), round(macd_8_days[-1], 2)
+        return False, round(current_close_price, 2), round(current_open_price, 2), round(current_price, 2), current_volume, average_volume, round(rsi_8_days[-1], 2), round(macd_8_days[-1], 2)
 
 
 def get_next_run_time():
@@ -81,10 +81,11 @@ def main():
                 etfs = ['SPY', 'QQQ', 'SPXL', 'VTI', 'VGT']
 
                 for etf in etfs:
-                    recommended, close_price, open_price, current_volume, average_volume, rsi, macd = analyze_stock(etf)
+                    recommended, close_price, open_price, current_price, current_volume, average_volume, rsi, macd = analyze_stock(etf)
                     print(f"\nAnalysis for {etf}:")
                     print(f"Yesterday's Close Price: {close_price:.2f}")
                     print(f"Open Price for Today: {open_price:.2f}")
+                    print(f"Current Price: {current_price:.2f}")
                     print(f"Current Volume: {current_volume:.2f}")
                     print(f"Average Volume: {average_volume:.2f}")
                     print(f"RSI: {rsi}")
