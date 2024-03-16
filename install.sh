@@ -1,10 +1,16 @@
 # A Shell script
 
-# Install dependencies using apt-get
-echo "Installing dependencies using apt-get..."
+# Update apt-get package lists
 sudo apt-get update
-sudo apt-get install -y python3-pip
 
-# Install dependencies using pip3
-echo "Installing dependencies using pip3..."
+# Install Python 3.10 and pip3
+sudo apt-get install -y python3.10-full python3-pip
+
+# Install yfinance and TA-Lib using pip3
 pip3 install yfinance TA-Lib
+
+# Install numpy using pip3
+pip3 install numpy
+
+# Install pytz using pip3
+pip3 install pytz
