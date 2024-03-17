@@ -1,6 +1,14 @@
 # Python-ETF-funds-Recommended-to-Buy-Today-Program
 A helpful Python Program that scans a list of ETF funds to buy today. Various stock market indicators are analyzed. 
 
+I run this code with Python version 3.10. 
+
+To run this code: 
+
+sh install.sh
+
+python3 python-stock-market-scanner.py 
+
 This code is not connected with a Stock Broker and it allows you to utulize any broker of your choosing like on your phone or web browser while you watch this Python Script keep you updated every time it continues running. 
 
 10:15am Eastern Time is when many Professional New York Stock Exchange people are comfortable with the early morning trading Volume and Volume balance Levels in the overall Stock Market. 10:15am Eastern Time is also just after most of the daily price reversals, and a perfect time to begin watching for the increasing prices in the major Stock Market Indexes like the S&P 500. The times in this Python code are able to be changed by editing the Python script source code in an IDE like Pycharm. 
