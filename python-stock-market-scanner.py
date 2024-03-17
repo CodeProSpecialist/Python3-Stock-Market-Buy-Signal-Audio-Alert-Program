@@ -92,4 +92,10 @@ def main():
         time.sleep(30)
 
 if __name__ == "__main__":
-    main()
+    while True:
+        try:
+            main()
+        except Exception as e:
+            print("An error occurred:", e)
+            print("Restarting the program in 5 seconds...")
+            time.sleep(5)
