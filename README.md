@@ -1,7 +1,7 @@
 # Python-ETF-funds-Recommended-to-Buy-Today-Program
 A helpful Python Program that scans a list of ETF funds to buy today. Various stock market indicators are analyzed. 
 
-Turn up the volume on your speakers because this program talks to when it is time to buy an ETF Fund. 
+Turn up the volume on your speakers because this program talks to you when it is time to buy an ETF Fund. 
 
 I run this code with Python version 3.10. 
 
