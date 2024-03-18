@@ -11,35 +11,44 @@ def get_data(symbol, start_date, end_date):
     return data
 
 def calculate_indicators(data):
-    close_prices = data[:, 4]
+    close_prices = data['Close'].values
+    if len(close_prices) < 14:  # Ensure enough data points for RSI calculation
+        return [], [], []
     rsi = RSI(close_prices, timeperiod=14)
+    if len(close_prices) < 26:  # Ensure enough data points for MACD calculation
+        return rsi, [], []
     macd, macd_signal, _ = MACD(close_prices, fastperiod=12, slowperiod=26, signalperiod=9)
     return rsi, macd, macd_signal
 
 def analyze_stock(symbol):
     end_date = datetime.today().strftime('%Y-%m-%d')
-    start_date_90_days_ago = (datetime.today() - timedelta(days=90)).strftime('%Y-%m-%d')
-    start_date_8_days_ago = (datetime.today() - timedelta(days=8)).strftime('%Y-%m-%d')
+    start_date_7_days_ago = (datetime.today() - timedelta(days=7)).strftime('%Y-%m-%d')
+    start_date_1_day_ago = (datetime.today() - timedelta(days=1)).strftime('%Y-%m-%d')
 
-    data_90_days = get_data(symbol, start_date_90_days_ago, end_date).values
-    data_8_days = get_data(symbol, start_date_8_days_ago, end_date).values
+    data_7_days = get_data(symbol, start_date_7_days_ago, end_date)
+    data_1_day = get_data(symbol, start_date_1_day_ago, end_date)
 
-    current_close_price = data_8_days[-1, 3]
-    current_open_price = data_8_days[-1, 0]
-    current_price = data_8_days[-1, 3]
-    current_volume = data_8_days[-1, 5]
-    average_volume = np.mean(data_90_days[:, 5])
+    if data_7_days.empty or data_1_day.empty:
+        return False, 0, 0, 0, 0, 0, 0, 0
 
-    rsi_90_days, macd_90_days, _ = calculate_indicators(data_90_days)
-    rsi_8_days, macd_8_days, macd_signal_8_days = calculate_indicators(data_8_days)
+    current_close_price = data_1_day['Close'].iloc[-1]
+    current_open_price = data_1_day['Open'].iloc[-1]
+    current_price = data_1_day['Close'].iloc[-1]
+    current_volume = data_1_day['Volume'].iloc[-1]
+    average_volume = np.mean(data_7_days['Volume'].values)
+
+    rsi, macd, macd_signal = calculate_indicators(data_7_days)
+
+    if len(rsi) == 0 or len(macd) == 0 or len(macd_signal) == 0:
+        return False, round(current_close_price, 2), round(current_open_price, 2), round(current_price, 2), current_volume, average_volume, 0, 0
 
     if (current_price > current_open_price) and \
             (current_price > current_close_price) and \
             ((current_volume > average_volume) or (current_volume >= 0.9 * average_volume)) and \
-            (rsi_8_days[-1] > 55):
-        return True, round(current_close_price, 2), round(current_open_price, 2), round(current_price, 2), current_volume, average_volume, round(rsi_8_days[-1], 2), round(macd_8_days[-1], 2)
+            (rsi[-1] > 55):
+        return True, round(current_close_price, 2), round(current_open_price, 2), round(current_price, 2), current_volume, average_volume, round(rsi[-1], 2), round(macd[-1], 2)
     else:
-        return False, round(current_close_price, 2), round(current_open_price, 2), round(current_price, 2), current_volume, average_volume, round(rsi_8_days[-1], 2), round(macd_8_days[-1], 2)
+        return False, round(current_close_price, 2), round(current_open_price, 2), round(current_price, 2), current_volume, average_volume, round(rsi[-1], 2), round(macd[-1], 2)
 
 def get_next_run_time():
     eastern = pytz.timezone('US/Eastern')
