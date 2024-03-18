@@ -6,52 +6,67 @@ from talib import RSI, MACD
 import pytz
 import time
 
-def get_data(symbol, start_date, end_date):
-    try:
-        data = yf.download(symbol, start=start_date, end=end_date)
-        return data
-    except Exception as e:
-        print(f"Failed to download data for {symbol}: {e}")
-        return None
+def get_top_increase_stocks(symbols):
+    top_stocks = {}
+    for symbol in symbols:
+        try:
+            stock = yf.Ticker(symbol)
+            hist_data = stock.history(period='1d')
 
-def get_opening_price(symbol):
-    stock_data = yf.Ticker(symbol)
-    try:
-        return round(stock_data.history(period="1d")["Open"].iloc[0], 4)
-    except Exception as e:
-        print(f"Failed to get opening price for {symbol}: {e}")
-        return None
+            if not hist_data.empty:
+                opening_price = hist_data['Open'].iloc[0]
+                closing_price = hist_data['Close'].iloc[-1]
+                price_increase = (closing_price - opening_price) / opening_price
+                top_stocks[symbol] = price_increase
+        except Exception as e:
+            print(f"Error retrieving data for {symbol}: {e}")
 
-def get_current_price(symbol):
-    stock_data = yf.Ticker(symbol)
-    try:
-        return round(stock_data.history(period='1d')['Close'].iloc[0], 4)
-    except Exception as e:
-        print(f"Failed to get current price for {symbol}: {e}")
-        return None
+        time.sleep(1)
+    return dict(sorted(top_stocks.items(), key=lambda item: item[1], reverse=True))
 
-def calculate_indicators(data):
-    close_prices = data[:, 4]
-    rsi = RSI(close_prices, timeperiod=14)
-    macd, macd_signal, _ = MACD(close_prices, fastperiod=12, slowperiod=26, signalperiod=9)
-    return rsi, macd, macd_signal
+def print_top_stocks(top_stocks):
+    rank = 1
+    for symbol, price_increase in top_stocks.items():
+        try:
+            stock = yf.Ticker(symbol)
+            current_price = stock.history(period='1d')['Close'].iloc[-1]
+            percent_change = price_increase * 100
+            change_symbol = '+' if percent_change > 0 else '-'
+            print(
+                f"{rank}. {symbol}: ${current_price:.2f}, Open: ${stock.history(period='1d')['Open'].iloc[0]:.2f}, {change_symbol}{abs(percent_change):.2f}%")
+            rank += 1
+            time.sleep(1)
+        except Exception as e:
+            print(f"Error printing data for {symbol}: {e}")
+
 
 def analyze_stock(symbol):
     end_date = datetime.today().strftime('%Y-%m-%d')
     start_date_6_months_ago = (datetime.today() - timedelta(days=180)).strftime('%Y-%m-%d')
     start_date_1_day_ago = (datetime.today() - timedelta(days=1)).strftime('%Y-%m-%d')
 
-    data_6_months = get_data(symbol, start_date_6_months_ago, end_date)
-    data_1_day = get_data(symbol, start_date_1_day_ago, end_date)
+    symbols = [symbol]
+    top_stocks = get_top_increase_stocks(symbols)
+    if symbol not in top_stocks:
+        return None, None, None, None, None, None, None, None
 
-    if data_6_months is None or data_1_day is None:
-        return False, None, None, None, None, None, None, None
+    stock = yf.Ticker(symbol)
+    data_6_months = stock.history(start=start_date_6_months_ago, end=end_date)
+    data_1_day = stock.history(start=start_date_1_day_ago, end=end_date)
 
-    current_close_price = data_1_day.iloc[-1]['Close']
-    current_open_price = get_opening_price(symbol)
-    current_price = get_current_price(symbol)
-    current_volume = data_1_day.iloc[-1]['Volume']
-    average_volume = np.mean(data_6_months['Volume'])
+    if data_1_day.shape[0] > 2:
+        historical_data = data_6_months
+    else:
+        historical_data = data_1_day
+
+    if historical_data.empty:
+        return None, None, None, None, None, None, None, None
+
+    current_close_price = historical_data.iloc[-1]['Close']
+    current_open_price = historical_data.iloc[0]['Open']
+    current_price = stock.history(period='1d')['Close'].iloc[-1]
+    current_volume = historical_data.iloc[-1]['Volume']
+    average_volume = np.mean(historical_data['Volume'])
 
     rsi_6_months, macd_6_months, _ = calculate_indicators(data_6_months)
     rsi_1_day, macd_1_day, macd_signal_1_day = calculate_indicators(data_1_day)
@@ -63,7 +78,14 @@ def analyze_stock(symbol):
                 (macd_1_day[-1] > macd_signal_1_day[-1]):
             return True, round(current_close_price, 2), round(current_open_price, 2), round(current_price, 2), current_volume, average_volume, round(rsi_1_day[-1], 2), round(macd_1_day[-1], 2)
     else:
-        return False, round(current_close_price, 2), round(current_open_price, 2), round(current_price, 2), current_volume, average_volume, round(rsi_1_day[-1], 2), round(macd_1_day[-1], 2)
+        return None, None, None, None, None, None, None, None
+
+
+def calculate_indicators(data):
+    close_prices = data['Close']
+    rsi = RSI(close_prices, timeperiod=14)
+    macd, macd_signal, _ = MACD(close_prices, fastperiod=12, slowperiod=26, signalperiod=9)
+    return rsi, macd, macd_signal
 
 def get_next_run_time():
     eastern = pytz.timezone('US/Eastern')
@@ -98,21 +120,26 @@ def main():
 
                     if recommended is not None:
                         print(f"\nAnalysis for {etf}:")
-                        print(f"Yesterday's Close Price: {close_price:.2f}")
-                        print(f"Open Price for Today: {open_price:.2f}")
-                        print(f"Current Price: {current_price:.2f}")  # Print today's current price
-                        print(f"Current Volume: {current_volume:.2f}")
-                        print(f"Average Volume: {average_volume:.2f}")
-                        print(f"RSI: {rsi}")
-                        print(f"MACD: {macd}")
+                        if close_price is not None:
+                            print(f"Yesterday's Close Price: {close_price:.2f}")
+                        if open_price is not None:
+                            print(f"Open Price for Today: {open_price:.2f}")
+                        if current_price is not None:
+                            print(f"Current Price: {current_price:.2f}")
+                        if current_volume is not None:
+                            print(f"Current Volume: {current_volume:.2f}")
+                        if average_volume is not None:
+                            print(f"Average Volume: {average_volume:.2f}")
+                        if rsi is not None:
+                            print(f"RSI: {rsi}")
+                        if macd is not None:
+                            print(f"MACD: {macd}")
 
                         if recommended:
                             print(f"{etf} is recommended to buy today.")
                             subprocess.run(["espeak", f"Time to buy {etf} right now."])
                         else:
                             print(f"{etf} is not recommended to buy today.")
-                    else:
-                        print(f"No data available for {etf}")
 
                 next_run_time += timedelta(seconds=30)
                 print("\nNext Run Time:", next_run_time.astimezone(eastern).strftime("%Y-%m-%d %I:%M:%S %p"), "Eastern Time ")
