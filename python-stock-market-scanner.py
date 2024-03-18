@@ -1,25 +1,28 @@
 import subprocess
-from datetime import timedelta, datetime
-
 import yfinance as yf
 import numpy as np
 import pytz
 import time
 import talib
+from datetime import datetime, timedelta
 
 def get_opening_price(symbol):
     stock_data = yf.Ticker(symbol)
     return round(stock_data.history(period="1d")["Open"].iloc[0], 4)
 
+def get_closing_price(symbol):
+    stock_data = yf.Ticker(symbol)
+    return round(stock_data.history(period="1d")["Close"].iloc[-1], 4)
+
 def get_current_price(symbol):
     stock_data = yf.Ticker(symbol)
     return round(stock_data.history(period='1d')['Close'].iloc[0], 4)
 
-def get_yesterday_close_price(symbol):
+def get_yesterday_closing_price(symbol):
     stock_data = yf.Ticker(symbol)
-    return round(stock_data.history(period="2d")["Close"].iloc[0], 4)
+    return round(stock_data.history(period='1d')['Close'].iloc[-2], 4)
 
-def calculate_technical_indicators(symbol, lookback_days=90):
+def calculate_technical_indicators(symbol, lookback_days=180):
     stock_data = yf.Ticker(symbol)
     historical_data = stock_data.history(period=f'{lookback_days}d')
 
@@ -38,38 +41,30 @@ def calculate_technical_indicators(symbol, lookback_days=90):
 
     return historical_data
 
-def print_technical_indicators(symbol, historical_data):
-    print("")
-    print(f"\nTechnical Indicators for {symbol}:\n")
-    print(historical_data[['Close', 'macd', 'signal', 'rsi', 'volume']].tail())
-    print("")
-
-def get_data(symbol, start_date, end_date):
-    data = yf.download(symbol, start=start_date, end=end_date)
-    return data
-
 def analyze_stock(symbol):
     end_date = datetime.today().strftime('%Y-%m-%d')
     start_date_6_months_ago = (datetime.today() - timedelta(days=180)).strftime('%Y-%m-%d')
 
     data_6_months = get_data(symbol, start_date_6_months_ago, end_date).values
 
-    current_close_price = data_6_months[-1, 3]
-    current_open_price = data_6_months[-1, 0]
+    open_price = get_opening_price(symbol)
     current_price = get_current_price(symbol)
-    yesterday_close_price = get_yesterday_close_price(symbol)
+    yesterday_close_price = get_yesterday_closing_price(symbol)
     current_volume = data_6_months[-1, 5]
     average_volume = np.mean(data_6_months[:, 5])
 
-    rsi_6_months, macd_6_months, _ = calculate_technical_indicators(symbol)
+    historical_data = calculate_technical_indicators(symbol)
 
-    if (current_price > current_open_price) and \
+    rsi = round(historical_data['rsi'].iloc[-1], 2)
+    macd = round(historical_data['macd'].iloc[-1], 2)
+
+    if (current_price > open_price) and \
             (current_price > yesterday_close_price) and \
             ((current_volume > average_volume) or (current_volume >= 0.9 * average_volume)) and \
-            (rsi_6_months[-1] > 55):
-        return True, round(current_close_price, 2), round(current_open_price, 2), round(current_price, 2), round(yesterday_close_price, 2), current_volume, average_volume, round(rsi_6_months[-1], 2), round(macd_6_months[-1], 2)
+            (rsi > 55):
+        return True, open_price, current_price, yesterday_close_price, current_volume, average_volume, rsi, macd
     else:
-        return False, round(current_close_price, 2), round(current_open_price, 2), round(current_price, 2), round(yesterday_close_price, 2), current_volume, average_volume, round(rsi_6_months[-1], 2), round(macd_6_months[-1], 2)
+        return False, open_price, current_price, yesterday_close_price, current_volume, average_volume, rsi, macd
 
 def get_next_run_time():
     eastern = pytz.timezone('US/Eastern')
@@ -100,7 +95,7 @@ def main():
                 etfs = ['SPY', 'QQQ', 'SPXL', 'VTI', 'VGT']
 
                 for etf in etfs:
-                    recommended, close_price, open_price, current_price, yesterday_close_price, current_volume, average_volume, rsi, macd = analyze_stock(etf)
+                    recommended, open_price, current_price, yesterday_close_price, current_volume, average_volume, rsi, macd = analyze_stock(etf)
                     print(f"\nAnalysis for {etf}:")
                     print(f"Yesterday's Close Price: {yesterday_close_price:.2f}")
                     print(f"Open Price for Today: {open_price:.2f}")
