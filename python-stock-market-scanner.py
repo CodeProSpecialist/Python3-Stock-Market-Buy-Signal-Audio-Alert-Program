@@ -42,7 +42,7 @@ def print_top_stocks(top_stocks):
 
 def analyze_stock(symbol):
     end_date = datetime.today().strftime('%Y-%m-%d')
-    start_date_6_months_ago = (datetime.today() - timedelta(days=180)).strftime('%Y-%m-%d')
+    start_date_7_days_ago = (datetime.today() - timedelta(days=7)).strftime('%Y-%m-%d')
     start_date_1_day_ago = (datetime.today() - timedelta(days=1)).strftime('%Y-%m-%d')
 
     symbols = [symbol]
@@ -51,11 +51,11 @@ def analyze_stock(symbol):
         return None, None, None, None, None, None, None, None
 
     stock = yf.Ticker(symbol)
-    data_6_months = stock.history(start=start_date_6_months_ago, end=end_date)
+    data_7_days = stock.history(start=start_date_7_days_ago, end=end_date)
     data_1_day = stock.history(start=start_date_1_day_ago, end=end_date)
 
-    if data_1_day.shape[0] > 2:
-        historical_data = data_6_months
+    if data_1_day.shape[0] > 1:
+        historical_data = data_7_days
     else:
         historical_data = data_1_day
 
@@ -68,7 +68,7 @@ def analyze_stock(symbol):
     current_volume = historical_data.iloc[-1]['Volume']
     average_volume = np.mean(historical_data['Volume'])
 
-    rsi_6_months, macd_6_months, _ = calculate_indicators(data_6_months)
+    rsi_7_days, macd_7_days, _ = calculate_indicators(data_7_days)
     rsi_1_day, macd_1_day, macd_signal_1_day = calculate_indicators(data_1_day)
 
     if current_open_price is not None and current_price is not None:
