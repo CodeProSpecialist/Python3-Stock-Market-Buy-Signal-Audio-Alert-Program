@@ -88,7 +88,7 @@ def main():
 
                     if recommended:
                         print(f"{etf} is recommended to buy today.")
-                        subprocess.run(["espeak", f"Time to buy {etf} ."])
+                        subprocess.run(["espeak", f"Buy {etf} ."])
                     else:
                         print(f"{etf} is not recommended to buy today.")
 
