@@ -1,5 +1,4 @@
-# Owner avatar
-Python3 Stock Market Buy Signal Audio Alert Program
+# Python3 Stock Market Buy Signal Audio Alert Program
 
 A helpful Python Program that scans a list of ETF funds to buy today. Various stock market indicators are analyzed. 
 
