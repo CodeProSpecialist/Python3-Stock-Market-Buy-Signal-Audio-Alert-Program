@@ -48,9 +48,13 @@ def get_next_run_time():
     now = datetime.now(eastern)
     next_run_time = now.replace(hour=10, minute=15, second=0, microsecond=0)
 
-    # If the current time is past 10:15 AM Eastern, schedule it for the next day
+    # If the current time is past 10:15 AM Eastern but before 4:00 PM Eastern, schedule it for the same day
     if now.hour > 10 or (now.hour == 10 and now.minute >= 15):
-        next_run_time += timedelta(days=1)
+        if now.hour < 16:
+            return next_run_time
+
+    # If the current time is past 4:00 PM Eastern, schedule it for the next day
+    next_run_time += timedelta(days=1)
 
     # Check if the next run time falls on a weekend, if so, advance to Monday
     while next_run_time.weekday() >= 5:
