@@ -30,7 +30,7 @@ def analyze_stock(symbol):
 
     rsi, macd, macd_signal = calculate_indicators(price_data)
 
-    if (rsi[-1] > 50) and \
+    if (rsi[-1] > 58) and \
             (current_volume >= 0.25 * average_volume) and \
             (current_price > current_open_price) and \
             (current_price > current_close_price):
