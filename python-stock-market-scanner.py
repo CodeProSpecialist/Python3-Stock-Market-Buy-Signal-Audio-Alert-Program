@@ -39,26 +39,25 @@ def analyze_stock(symbol):
         return False, round(current_close_price, 2), round(current_open_price, 2), round(current_price, 2), current_volume, average_volume, round(rsi[-1], 2), round(macd[-1], 2)
 
 
-
-
 def get_current_price(symbol):
     stock_data = yf.Ticker(symbol)
     return round(stock_data.history(period='1d')['Close'].iloc[0], 4)
 
 def get_next_run_time():
     eastern = pytz.timezone('US/Eastern')
-    now = datetime.now()
+    now = datetime.now(eastern)
     next_run_time = now.replace(hour=10, minute=15, second=0, microsecond=0)
 
-    # If the next run time is past 4 PM, schedule it for the next day
-    if now.hour >= 16:
+    # If the current time is past 10:15 AM Eastern, schedule it for the next day
+    if now.hour > 10 or (now.hour == 10 and now.minute >= 15):
         next_run_time += timedelta(days=1)
 
     # Check if the next run time falls on a weekend, if so, advance to Monday
     while next_run_time.weekday() >= 5:
         next_run_time += timedelta(days=1)
 
-    return eastern.localize(next_run_time)
+    return next_run_time.astimezone(eastern)
+
 
 def main():
     eastern = pytz.timezone('US/Eastern')
