@@ -6,6 +6,8 @@ from talib import RSI, MACD
 import pytz
 import time
 
+first_run = True  # Global variable to track the first run
+
 def get_price_data(symbol, start_date, end_date):
     data = yf.download(symbol, start=start_date, end=end_date)
     return data
@@ -43,9 +45,17 @@ def get_current_price(symbol):
     stock_data = yf.Ticker(symbol)
     return round(stock_data.history(period='1d')['Close'].iloc[0], 4)
 
+
 def get_next_run_time():
+    global first_run  # Access the global variable
+
     eastern = pytz.timezone('US/Eastern')
     now = datetime.now(eastern)
+
+    # If it's the first run, schedule the next run immediately without waiting
+    if first_run:
+        first_run = False
+        return now
 
     # If the current time is before 4:00 PM Eastern, schedule the next run in 30 seconds
     if now.hour < 16:
