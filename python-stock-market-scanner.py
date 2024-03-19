@@ -65,7 +65,8 @@ def get_next_run_time():
         while next_run_time.weekday() >= 5:
             next_run_time += timedelta(days=1)
 
-    return next_run_time.astimezone(eastern)
+    return next_run_time.astimezone(eastern) if now.hour >= 16 else next_run_time
+
 
 
 def main():
