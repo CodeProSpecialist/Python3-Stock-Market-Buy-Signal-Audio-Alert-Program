@@ -43,13 +43,12 @@ def get_current_price(symbol):
     stock_data = yf.Ticker(symbol)
     return round(stock_data.history(period='1d')['Close'].iloc[0], 4)
 
-
 def get_next_run_time():
     eastern = pytz.timezone('US/Eastern')
     now = datetime.now(eastern)
 
-    # If the current time is between 10:15 AM and 4:00 PM Eastern, schedule the next run in 30 seconds
-    if now.hour == 10 and now.minute >= 15 and now.hour < 16:
+    # If the current time is before 4:00 PM Eastern, schedule the next run in 30 seconds
+    if now.hour < 16:
         return now + timedelta(seconds=30)
 
     # If the current time is before 10:15 AM Eastern, schedule the next run for 10:15 AM Eastern
@@ -65,8 +64,7 @@ def get_next_run_time():
         while next_run_time.weekday() >= 5:
             next_run_time += timedelta(days=1)
 
-    return next_run_time.astimezone(eastern) if now.hour >= 16 else next_run_time
-
+    return next_run_time.astimezone(eastern)
 
 
 def main():
