@@ -1,7 +1,11 @@
-# Python Stock Market Scanner Program 
+# Owner avatar
+Python3 Stock Market Buy Signal Audio Alert Program
+
 A helpful Python Program that scans a list of ETF funds to buy today. Various stock market indicators are analyzed. 
 
 Turn up the volume on your speakers because this program talks to you when it is time to buy an ETF Fund. 
+You can also change the ETF funds to the names of stocks that you would like to monitor by editing the 
+Python source code. 
 
 I run this code with Python version 3.10. 
 
