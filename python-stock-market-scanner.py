@@ -43,29 +43,29 @@ def get_current_price(symbol):
     stock_data = yf.Ticker(symbol)
     return round(stock_data.history(period='1d')['Close'].iloc[0], 4)
 
+
 def get_next_run_time():
     eastern = pytz.timezone('US/Eastern')
     now = datetime.now(eastern)
 
-    # If the current time is before 4:00 PM Eastern, schedule the next run in 30 seconds
-    if now.hour < 16:
+    # If the current time is between 10:15 AM and 4:00 PM Eastern, schedule the next run in 30 seconds
+    if now.hour == 10 and now.minute >= 15 and now.hour < 16:
         return now + timedelta(seconds=30)
 
-    next_run_time = now.replace(hour=10, minute=15, second=0, microsecond=0)
+    # If the current time is before 10:15 AM Eastern, schedule the next run for 10:15 AM Eastern
+    if now.hour < 10 or (now.hour == 10 and now.minute < 15):
+        next_run_time = now.replace(hour=10, minute=15, second=0, microsecond=0)
 
-    # If the current time is past 10:15 AM Eastern but before 4:00 PM Eastern, schedule it for the same day
-    if now.hour > 10 or (now.hour == 10 and now.minute >= 15):
-        return next_run_time
+    # If the current time is after 4:00 PM Eastern, schedule the next run for the next day at 10:15 AM Eastern
+    else:
+        next_run_time = now + timedelta(days=1)
+        next_run_time = next_run_time.replace(hour=10, minute=15, second=0, microsecond=0)
 
-    # If the current time is past 4:00 PM Eastern, schedule it for the next day
-    next_run_time += timedelta(days=1)
-
-    # Check if the next run time falls on a weekend, if so, advance to Monday
-    while next_run_time.weekday() >= 5:
-        next_run_time += timedelta(days=1)
+        # Check if the next run time falls on a weekend, if so, advance to Monday
+        while next_run_time.weekday() >= 5:
+            next_run_time += timedelta(days=1)
 
     return next_run_time.astimezone(eastern)
-
 
 
 def main():
