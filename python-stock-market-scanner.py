@@ -95,7 +95,7 @@ def main():
         if now >= next_run_time and now.hour < 16:
             if now.weekday() < 5:
                 print("Recommended Stocks to Buy Today:")
-                etfs = ['SPY', 'QQQ', 'SPXL', 'SOXL', 'SPMD', 'TQQQ', 'VTI', 'VGT']
+                etfs = ['SPY', 'QQQ', 'SPXL', 'SPMD', 'VTI', 'VGT']
 
                 for etf in etfs:
                     recommended, close_price, open_price, current_price, current_volume, average_volume, rsi, macd = analyze_stock(etf)
