@@ -18,6 +18,11 @@ def calculate_indicators(data):
     macd, macd_signal, _ = MACD(close_prices, fastperiod=12, slowperiod=26, signalperiod=9)
     return rsi, macd, macd_signal
 
+def get_opening_price(symbol):
+    stock_data = yf.Ticker(symbol)
+    # Fetch the stock data for today and get the opening price
+    return round(stock_data.history(period="1d")["Open"].iloc[0], 4)
+
 def analyze_stock(symbol):
     end_date = datetime.today().strftime('%Y-%m-%d')
     start_date_6_months_ago = (datetime.today() - timedelta(days=180)).strftime('%Y-%m-%d')
@@ -25,7 +30,7 @@ def analyze_stock(symbol):
     price_data = get_price_data(symbol, start_date_6_months_ago, end_date).values
 
     current_close_price = price_data[-1, 3]
-    current_open_price = price_data[-1, 0]
+    current_open_price = get_opening_price(symbol)
     current_price = get_current_price(symbol)  # Get today's current price
     current_volume = price_data[-1, 5]
     average_volume = np.mean(price_data[:, 5])
@@ -90,7 +95,7 @@ def main():
         if now >= next_run_time and now.hour < 16:
             if now.weekday() < 5:
                 print("Recommended Stocks to Buy Today:")
-                etfs = ['SPY', 'QQQ', 'SPXL', 'VTI', 'VGT']
+                etfs = ['SPY', 'QQQ', 'SPXL', 'SOXL', 'SPMD', 'TQQQ', 'VTI', 'VGT']
 
                 for etf in etfs:
                     recommended, close_price, open_price, current_price, current_volume, average_volume, rsi, macd = analyze_stock(etf)
