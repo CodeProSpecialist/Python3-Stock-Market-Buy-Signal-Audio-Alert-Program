@@ -50,7 +50,6 @@ def get_current_price(symbol):
     stock_data = yf.Ticker(symbol)
     return round(stock_data.history(period='1d')['Close'].iloc[0], 4)
 
-
 def get_next_run_time():
     global first_run  # Access the global variable
 
@@ -80,7 +79,6 @@ def get_next_run_time():
             next_run_time += timedelta(days=1)
 
     return next_run_time.astimezone(eastern)
-
 
 def main():
     eastern = pytz.timezone('US/Eastern')
@@ -127,3 +125,4 @@ if __name__ == "__main__":
             print("An error occurred:", e)
             print("Restarting the program in 5 seconds...")
             time.sleep(5)
+
