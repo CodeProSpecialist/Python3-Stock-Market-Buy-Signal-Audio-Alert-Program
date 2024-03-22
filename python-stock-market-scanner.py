@@ -73,7 +73,7 @@ def get_next_run_time():
         while next_run_time.weekday() >= 5:
             next_run_time += timedelta(days=1)
 
-    return next_run_time.astimezone(eastern)
+    return next_run_time.astimezone(eastern).strftime("%I:%M %p")  # Format with AM/PM
 
 # Example usage:
 next_run = get_next_run_time()
