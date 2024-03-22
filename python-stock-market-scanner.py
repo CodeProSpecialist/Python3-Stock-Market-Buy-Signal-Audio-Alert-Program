@@ -85,6 +85,14 @@ def main():
     print("Date and Time: ", datetime.now(eastern).strftime("%A, %B %d, %Y, %I:%M:%S %p"), "Eastern ")
     print("")
     print("This program runs from 10:15 AM until 4:00 PM, Eastern, Monday - Friday. ")
+    print("")
+    subprocess.run(["espeak",
+                    "Remember to not buy before 10:15 AM and do not buy before I recommend to buy or you are buying based on emotion and emotion or excitement buying leads to loss of investment. "])
+    print("")
+    print("This program will begin in 30 seconds. ")
+    subprocess.run(["espeak", "This program will begin in 30 seconds. "])
+
+    print("")
     #print("Next Run Time:", next_run_time.astimezone(eastern).strftime("%A, %B %d, %Y, %I:%M:%S %p"), "Eastern ")
     print("")
 
@@ -116,6 +124,7 @@ def main():
 
                 next_run_time2 += timedelta(seconds=30)
                 print("\nNext Run Time:", next_run_time2.astimezone(eastern).strftime("%A, %B %d, %Y, %I:%M:%S %p"), "Eastern ")
+                subprocess.run(["espeak", "Remember to not buy before 10:15 AM and do not buy before I recommend to buy or you are buying based on emotion and emotion or excitement buying leads to loss of investment. "])
 
         time.sleep(30)
 
