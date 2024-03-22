@@ -55,24 +55,29 @@ def get_next_run_time():
     eastern = pytz.timezone('US/Eastern')
     now = datetime.now(eastern)
 
-    # If the current time is before 10:15 AM Eastern, schedule the next run for 10:15 AM Eastern
-    if now.hour < 10 or (now.hour == 10 and now.minute < 15):
+    # If today is Saturday or Sunday, set next run time to Monday 10:15 AM Eastern
+    if now.weekday() >= 5:  # 5 represents Saturday and 6 represents Sunday
         next_run_time = now.replace(hour=10, minute=15, second=0, microsecond=0)
-
+        next_run_time += timedelta(days=(7 - now.weekday()))  # Advance to Monday
+    # If the current time is before 10:15 AM Eastern, schedule the next run for 10:15 AM Eastern
+    elif now.hour < 10 or (now.hour == 10 and now.minute < 15):
+        next_run_time = now.replace(hour=10, minute=15, second=0, microsecond=0)
     # If the current time is before 4:00 PM Eastern, schedule the next run in 30 seconds
-    if now.hour > 10 or (now.hour == 10 and now.minute > 15) and now.hour < 16:
-        return now + timedelta(seconds=30)
-
+    elif now.hour < 16:
+        next_run_time = now + timedelta(seconds=30)
     # If the current time is after 4:00 PM Eastern, schedule the next run for the next day at 10:15 AM Eastern
     else:
-        next_run_time = now + timedelta(days=1)
-        next_run_time = next_run_time.replace(hour=10, minute=15, second=0, microsecond=0)
-
+        next_run_time = now.replace(hour=10, minute=15, second=0, microsecond=0)
+        next_run_time += timedelta(days=1)
         # Check if the next run time falls on a weekend, if so, advance to Monday
         while next_run_time.weekday() >= 5:
             next_run_time += timedelta(days=1)
 
     return next_run_time.astimezone(eastern)
+
+# Example usage:
+next_run = get_next_run_time()
+print("Next run time:", next_run)
 
 def main():
     eastern = pytz.timezone('US/Eastern')
