@@ -60,7 +60,7 @@ def get_next_run_time():
         next_run_time = now.replace(hour=10, minute=15, second=0, microsecond=0)
 
     # If the current time is before 4:00 PM Eastern, schedule the next run in 30 seconds
-    if now.hour > 10 or (now.hour == 10 and now.minute < 15) and now.hour < 16:
+    if now.hour > 10 or (now.hour == 10 and now.minute > 15) and now.hour < 16:
         return now + timedelta(seconds=30)
 
     # If the current time is after 4:00 PM Eastern, schedule the next run for the next day at 10:15 AM Eastern
