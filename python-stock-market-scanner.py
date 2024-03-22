@@ -1,5 +1,4 @@
 # python 3.10
-
 import subprocess
 import yfinance as yf
 from datetime import datetime, timedelta
@@ -26,9 +25,9 @@ def get_opening_price(symbol):
 
 def analyze_stock(symbol):
     end_date = datetime.today().strftime('%Y-%m-%d')
-    start_date_6_months_ago = (datetime.today() - timedelta(days=180)).strftime('%Y-%m-%d')
+    start_date_3_months_ago = (datetime.today() - timedelta(days=90)).strftime('%Y-%m-%d')
 
-    price_data = get_price_data(symbol, start_date_6_months_ago, end_date).values
+    price_data = get_price_data(symbol, start_date_3_months_ago, end_date).values
 
     current_close_price = price_data[-1, 3]
     current_open_price = get_opening_price(symbol)
@@ -79,9 +78,15 @@ def get_next_run_time():
 def main():
     eastern = pytz.timezone('US/Eastern')
     next_run_time = get_next_run_time()
-
-    print("Date and Time: ", datetime.now(eastern).strftime("%Y-%m-%d %I:%M:%S %p"), "Eastern Time ")
-    print("Next Run Time:", next_run_time.astimezone(eastern).strftime("%Y-%m-%d %I:%M:%S %p"), "Eastern Time ")
+    next_run_time2 = datetime.now(eastern)
+    print("")
+    print("Stock Market Buy Signal Audio Alert Program by CodeProSpecialist ")
+    print("")
+    print("Date and Time: ", datetime.now(eastern).strftime("%A, %B %d, %Y, %I:%M:%S %p"), "Eastern ")
+    print("")
+    print("This program runs from 10:15 AM until 4:00 PM, Eastern, Monday - Friday. ")
+    #print("Next Run Time:", next_run_time.astimezone(eastern).strftime("%A, %B %d, %Y, %I:%M:%S %p"), "Eastern ")
+    print("")
 
     while True:
         now = datetime.now(eastern)
@@ -107,9 +112,10 @@ def main():
                         subprocess.run(["espeak", f"Buy {etf} ."])
                     else:
                         print(f"{etf} is not recommended to buy today.")
+                    time.sleep(0.5)
 
-                next_run_time += timedelta(seconds=30)
-                print("\nNext Run Time:", next_run_time.astimezone(eastern).strftime("%Y-%m-%d %I:%M:%S %p"), "Eastern Time ")
+                next_run_time2 += timedelta(seconds=30)
+                print("\nNext Run Time:", next_run_time2.astimezone(eastern).strftime("%A, %B %d, %Y, %I:%M:%S %p"), "Eastern ")
 
         time.sleep(30)
 
@@ -119,6 +125,6 @@ if __name__ == "__main__":
             main()
         except Exception as e:
             print("An error occurred:", e)
-            print("Restarting the program in 5 seconds...")
+            print("Restarting the program in 5 seconds.....")
             time.sleep(5)
 
