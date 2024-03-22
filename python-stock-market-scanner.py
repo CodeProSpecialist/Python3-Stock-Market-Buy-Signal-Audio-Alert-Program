@@ -73,11 +73,12 @@ def get_next_run_time():
         while next_run_time.weekday() >= 5:
             next_run_time += timedelta(days=1)
 
-    return next_run_time.astimezone(eastern).strftime("%I:%M %p")  # Format with AM/PM
+    return next_run_time  # Return datetime object
 
 # Example usage:
 next_run = get_next_run_time()
-print("Next run time:", next_run)
+print("Next run time:", next_run.strftime("%I:%M %p"))  # Format with AM/PM
+print("Date and Time:", next_run.astimezone(pytz.timezone('US/Eastern')).strftime("%Y-%m-%d %I:%M:%S %p %Z"))
 
 def main():
     eastern = pytz.timezone('US/Eastern')
