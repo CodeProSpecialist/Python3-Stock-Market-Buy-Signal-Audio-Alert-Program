@@ -124,8 +124,8 @@ def main():
 
                 next_run_time2 += timedelta(seconds=30)
                 print("\nNext Run Time:", next_run_time2.astimezone(eastern).strftime("%A, %B %d, %Y, %I:%M:%S %p"), "Eastern ")
-                subprocess.run(["espeak",
-                                "Remember to not buy before 10:15 AM or unless I recommend to buy. "])
+                #subprocess.run(["espeak",
+                #                "Remember to not buy before 10:15 AM or unless I recommend to buy. "])
 
         time.sleep(30)
 
