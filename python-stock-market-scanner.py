@@ -102,7 +102,7 @@ def main():
         if now >= next_run_time and now.hour < 16:
             if now.weekday() < 5:
                 print("Recommended Stocks to Buy Today:")
-                etfs = ['VOO', 'VGT', 'VOOV', 'VOT', 'SPMD', 'VTI', 'VGT']
+                etfs = ['DJT', 'VGT', 'VOOV', 'VOT', 'SPMD', 'UMDD', 'VTI', 'VGT']
 
                 for etf in etfs:
                     recommended, close_price, open_price, current_price, current_volume, average_volume, rsi, macd = analyze_stock(etf)
@@ -125,7 +125,7 @@ def main():
                 next_run_time2 += timedelta(seconds=30)
                 print("\nNext Run Time:", next_run_time2.astimezone(eastern).strftime("%A, %B %d, %Y, %I:%M:%S %p"), "Eastern ")
                 subprocess.run(["espeak",
-                                "Remember to not buy before 10:15 AM and do not buy before I recommend to buy or you are buying based on emotion and emotion or excitement buying is not productive. "])
+                                "Remember to not buy before 10:15 AM or unless I recommend to buy. "])
 
         time.sleep(30)
 
